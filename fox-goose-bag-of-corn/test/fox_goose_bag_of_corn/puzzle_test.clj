@@ -17,10 +17,10 @@
 (deftest test-river-crossing-plan
   (let [crossing-plan (map (partial map set) (river-crossing-plan))]
     (testing "you begin with the fox, goose and corn on one side of the river"
-      (is (= [#{:you :fox :goose :corn} #{:boat} #{}]
+      (is (= [#{:you :fox :goose :corn} #{} #{}]
              (first crossing-plan))))
     (testing "you end with the fox, goose and corn on one side of the river"
-      (is (= [#{} #{:boat} #{:you :fox :goose :corn}]
+      (is (= [#{} #{} #{:you :fox :goose :corn}]
              (last crossing-plan))))
     (testing "things are safe"
       (let [left-bank (map first crossing-plan)
