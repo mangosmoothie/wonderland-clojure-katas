@@ -7,6 +7,9 @@
                         (and (% :goose) (% :corn) (not (% :you))))
                    step)))
 
+(defn done? [steps]
+  (= (peek (vec steps)) [#{}#{}#{:you :fox :corn :goose}]))
+
 (defn new? [candidate used]
   (not-any? #(= candidate %) used))
 
@@ -41,45 +44,31 @@
       (= 1 your-location) (boat-move used-steps)
       (= 2 your-location) (move-left used-steps))))
 
-(defn river-crossing-plan []
-  (let [used (conj [] start-pos)]
-    (loop [used used]
-      (println used)
-      (let [lastone (peek (vec used))]
-        (if (and (empty? (lastone 0)) (empty? (lastone 1)))
-          used
-          (recur (conj used (vec (first (generate-step used))))))))))
-
 (defn choose [used-steps candidates]
   (println (str "choosing for used->" used-steps))
   (println (str "choices->" (vec candidates)))
   (reduce
     (fn [_ next-candidate]
-      (let [next-steps (generate-step (conj used-steps next-candidate))]
-        (cond (empty? next-steps) nil
-              :else (if (= (peek (vec next-steps)) [#{}#{}#{:you :fox :corn :goose}])
-                      (reduced (vector next-candidate))
-                      (if (empty? (choose (conj used-steps next-candidate) next-steps))
-                        nil
-                        (reduced (vector next-candidate)))))))
+      (if (done? (vector next-candidate))
+        (reduced (vector next-candidate))
+        (let [next-steps (generate-step (conj used-steps next-candidate))]
+          (if (empty? next-steps)
+            nil
+            (if (done? next-steps)
+              (reduced (vector next-candidate))
+              (if (empty? (choose (conj used-steps next-candidate) next-steps))
+                nil
+                (reduced (vector next-candidate))))))))
     nil
     candidates))
 
 (defn river-crossing-plan []
   (let [used (conj [] start-pos)]
     (loop [used used]
-      (let [lastone (peek (vec used))]
-        (if (and (empty? (lastone 0)) (empty? (lastone 1)))
-          used
-          (let [next-steps (generate-step used)
-                next-step (choose used next-steps)]
-            (if (= (peek (vec next-step)) [#{}#{}#{:you :fox :corn :goose}])
-              (conj used (vec (first next-step)))
-              (if (= (peek (vec next-steps)) [#{}#{}#{:you :fox :corn :goose}])
-                (conj used (vec (first next-steps)))
-                (if (= (peek (vec next-step)) [#{}#{}#{:you :fox :corn :goose}])
-                  next-step
-                  (recur (conj used (vec (first next-step)))))))))))))
+      (let [next-step (choose used (generate-step used))]
+        (if (done? next-step)
+          (conj used (vec (first next-step)))
+          (recur (conj used (vec (first next-step)))))))))
 
 
 (river-crossing-plan)
